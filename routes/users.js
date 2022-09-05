@@ -4,7 +4,15 @@ const User = require('../models/User');
 
 //! GET A USER
 
-router.get('/', (req, res) => {});
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    const { password, isAdmin, ...otherCredentials } = user._doc;
+    res.status(200).json(otherCredentials);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
 
 //! FOLLOW A USER
 router.put('/', (req, res) => {});
