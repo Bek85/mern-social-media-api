@@ -2,7 +2,14 @@ const router = require('express').Router();
 const Post = require('../models/Post');
 
 //! GET A POST
-router.get('/', (req, res) => {});
+router.get('/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json('Something went wrong on the server');
+  }
+});
 
 //! GET ALL POSTS
 
@@ -18,7 +25,6 @@ router.post('/', async (req, res) => {
 });
 
 //! UPDATE A POST
-
 router.put('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -33,8 +39,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-//! LIKE A POST
-
+//! LIKE and DISLIKE A POST
 router.put('/:id/like', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -51,7 +56,6 @@ router.put('/:id/like', async (req, res) => {
 });
 
 //! DELETE A POST
-
 router.delete('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
