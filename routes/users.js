@@ -1,16 +1,39 @@
 const router = require('express').Router();
 const bcrypt = require('bcrypt');
+const { json } = require('express');
 const User = require('../models/User');
 
 //! GET A USER
 
 router.get('/', async (req, res) => {
-  const userId = req.query.userId; 
+  const userId = req.query.userId;
   const username = req.query.username;
   try {
-    const user = userId ? await User.findById(userId) : await User.findOne({username: username});
+    const user = userId
+      ? await User.findById(userId)
+      : await User.findOne({ username: username });
     const { password, isAdmin, ...otherCredentials } = user._doc;
     res.status(200).json(otherCredentials);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
+//! GET A USER's Friends
+router.get('/friends/:userId', async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.params.userId);
+    const userFriends = await Promise.all(
+      currentUser.followers.map((followerId) => {
+        return User.findById(followerId);
+      })
+    );
+    let friendList = [];
+    userFriends.map((friend) => {
+      const { _id, username, profilePic } = friend;
+      friendList.push(_id, username, profilePic);
+    });
+    res.status(200).json(friendList);
   } catch (error) {
     res.status(500).json(error);
   }
