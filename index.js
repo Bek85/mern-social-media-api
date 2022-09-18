@@ -3,19 +3,21 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const multer = require('multer');
+const path = require('path');
 const PORT = process.env.PORT || 4000;
 
 const userRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
 const postRoute = require('./routes/posts');
 
-const app = express();
 dotenv.config();
-
-// middleware setup
+const app = express();
 app.use(express.json());
-app.use(helmet());
-app.use(morgan('common'));
+app.use(
+  'public/assets/images',
+  express.static(path.join(__dirname, 'public/assets/images'))
+);
 
 mongoose.connect(
   process.env.MONGO_URL,
@@ -29,6 +31,25 @@ mongoose.connect(
 );
 
 // routes
+
+// middleware setup
+
+app.use(helmet());
+app.use(morgan('common'));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/assets/images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, req.body.name);
+  },
+});
+
+const upload = multer({ storage: storage });
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  res.status(200).json('File has been uploaded');
+});
 
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
