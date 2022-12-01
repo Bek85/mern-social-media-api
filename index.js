@@ -5,19 +5,25 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const multer = require('multer');
 const path = require('path');
+const cors = require('cors');
 const PORT = process.env.PORT || 4000;
 
 const userRoute = require('./routes/users');
 const authRoute = require('./routes/auth');
 const postRoute = require('./routes/posts');
 
-dotenv.config();
 const app = express();
+
+
+// middleware setup
+
+dotenv.config();
 app.use(express.json());
 app.use(
   'public/assets/images',
   express.static(path.join(__dirname, 'public/assets/images'))
 );
+app.use(cors());
 
 mongoose.connect(
   process.env.MONGO_URL,
@@ -29,10 +35,6 @@ mongoose.connect(
     console.log('Connected to MONGODB');
   }
 );
-
-// routes
-
-// middleware setup
 
 app.use(helmet());
 app.use(morgan('common'));
@@ -51,10 +53,12 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
   res.status(200).json('File has been uploaded');
 });
 
+// routes
+
 app.use('/api/users', userRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/posts', postRoute);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Listening on port ${PORT}`);
 });
